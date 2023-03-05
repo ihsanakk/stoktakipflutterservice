@@ -5,6 +5,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +46,10 @@ public class AuthController {
 
     @PostMapping("/register")
     ResponseEntity<MessageResponse> register(@RequestBody RegisterRequest registerRequest) {
+
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Email is already taken"));
+        }
         
         User user = new User();
         user.setEmail(registerRequest.getEmail());
@@ -53,6 +58,19 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok().body(new MessageResponse("Registered Successfully"));
+    }
+
+    @GetMapping("/validate")
+    ResponseEntity<MessageResponse> validateToken(String token) {
+
+        try{
+            if (jwtUtils.validateJwtToken(token)) {
+                return ResponseEntity.ok().body(new MessageResponse("Token is valid"));
+            }
+            return ResponseEntity.badRequest().body(new MessageResponse("Token is invalid")); 
+        }catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Token is invalid"));
+        }
     }
 
 }
