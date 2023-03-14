@@ -29,6 +29,7 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authz) -> authz
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/error").permitAll()
                     .anyRequest().authenticated()
                 );
         http.exceptionHandling().authenticationEntryPoint(authEntyPoint);
